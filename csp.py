@@ -42,7 +42,25 @@ class CSP:
                     if value1 != value2:
                         self.binary_constraints[(variable1, variable2)].add((value1, value2))
                         self.binary_constraints[(variable1, variable2)].add((value2, value1))
+    def revise(self, Xi, Xj):
+        revised = False
+        contstraint_frem = self.binary_constraints.get((Xi,Xj), set())
+        contstraint_bak = self.binary_constraints.get((Xj,Xi), set())
 
+
+
+        for x_verdi in set(self.domains[Xi]):
+            godkjent = False #om verdien til Xi er lovlig gitt Xj
+            for y_verdi in set (self.domains[Xj]):
+                if((x_verdi,y_verdi) in contstraint_frem):
+                    godkjent = True
+                elif((y_verdi, x_verdi) in contstraint_bak):
+                    godkjent = True
+            if not godkjent:
+                self.domains[Xi].remove(x_verdi)
+                revised = True
+        return revised
+         
     def ac_3(self) -> bool:
         """Performs AC-3 on the CSP.
         Meant to be run prior to calling backtracking_search() to reduce the search for some problems.
@@ -52,8 +70,27 @@ class CSP:
         bool
             False if a domain becomes empty, otherwise True
         """
-        # YOUR CODE HERE (and remove the assertion below)
-        assert False, "Not implemented"
+        #sikre at man får med alle siden forskjell på rekkefølge
+        kø = []
+        for(Xi, Xj) in self.binary_constraints:
+            kø.append((Xi, Xj))
+            kø.append((Xj,Xi))
+
+        while kø:
+            (Xi, Xj) = kø.pop()
+            if self.revise(Xi, Xj):
+                if len(self.domains[Xi])==0:
+                    return False
+                #finne naboer og legge til
+                naboer = set()
+                for (A, B) in self.binary_constraints:
+                    if A == Xi and B != Xj:
+                        naboer.add(B)
+                    elif A != Xj and B==Xi:
+                        naboer.add(A)
+                for Xk in naboer:
+                    kø.append((Xk, Xi))
+        return True
 
     def backtracking_search(self) -> None | dict[str, Any]:
         """Performs backtracking search on the CSP.
