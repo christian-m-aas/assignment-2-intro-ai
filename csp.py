@@ -64,8 +64,40 @@ class CSP:
             A solution if any exists, otherwise None
         """
         def backtrack(assignment: dict[str, Any]):
-            # YOUR CODE HERE (and remove the assertion below)
-            assert False, "Not implemented"
+            if len(assignment) == len(self.variables):
+                return assignment
+
+            for variable in self.variables:
+                if variable not in assignment:
+                    var = variable
+                    break
+
+            for value in self.domains[var]:
+                consistent = True
+
+                for assigned_var in assignment:
+                    assigned_value = assignment[assigned_var]
+
+                    if (
+                        (assigned_var, var) in self.binary_constraints
+                        and (assigned_value, value) not in self.binary_constraints[(assigned_var, var)]
+                    ) or (
+                        (var, assigned_var) in self.binary_constraints
+                        and (value, assigned_value) not in self.binary_constraints[(var, assigned_var)]
+                    ):
+                        consistent = False
+                        break
+
+                if consistent:
+                    assignment[var] = value
+                    result = backtrack(assignment)
+
+                    if result is not None:
+                        return result
+
+                    del assignment[var]
+
+            return None
 
         return backtrack({})
 

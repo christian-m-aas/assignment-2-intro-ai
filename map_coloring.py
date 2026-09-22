@@ -19,9 +19,9 @@ csp = CSP(
         ('Q', 'NSW'),
         ('NSW', 'V'),
     ],
+
 )
 
 print(csp.backtracking_search())
-print('Du er schtøgg:(((')
 # Example output after implementing csp.backtracking_search():
 # {'WA': 'red', 'NT': 'green', 'Q': 'red', 'NSW': 'green', 'V': 'red', 'SA': 'blue', 'T': 'red'}
