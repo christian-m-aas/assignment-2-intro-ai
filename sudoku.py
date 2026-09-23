@@ -2,6 +2,7 @@
 # The CSP.ac_3() and CSP.backtrack() methods need to be implemented
 
 from csp import CSP, alldiff
+import time
 
 
 def print_solution(solution):
@@ -48,14 +49,67 @@ for box_row in range(box_width):
             ]
         )
 
-csp = CSP(
+# Create a spearate CSP instance to measure backtracking WITHOUT AC-3 
+csp_without_ac3 = CSP(
     variables=[f'X{row+1}{col+1}' for row in range(width) for col in range(width)],
-    domains=domains,
+    domains={var: values.copy() for var, values in domains.items()},
     edges=edges,
 )
 
-print(csp.ac_3())
-print_solution(csp.backtracking_search())
+backtracking_start_time = time.perf_counter()
+solution_without_ac3 = csp_without_ac3.backtracking_search()
+backtracking_end_time = time.perf_counter()
+
+# Create a new CSP instance so AC-3 starts with the original domains.
+# AC-3 reduces domains before backtracking is run
+csp_with_ac3 = CSP(
+    variables=[f'X{row+1}{col+1}' for row in range(width) for col in range(width)],
+    domains={var: values.copy() for var, values in domains.items()},
+    edges=edges,
+)
+
+# Measure the total runtime of AC-3 followed by backtracking
+total_start_time = time.perf_counter()
+ac3_result = csp_with_ac3.ac_3()
+
+# Measure the backtracking runtime separately after AC-3
+backtracking_ac3_start_time = time.perf_counter()
+solution_with_ac3 = csp_with_ac3.backtracking_search()
+backtracking_ac3_end_time = time.perf_counter()
+
+total_end_time = time.perf_counter()
+
+# Printing results
+
+print("\nDomains after AC-3")
+for variable in csp_with_ac3.variables:
+    print(variable, csp_with_ac3.domains[variable])
+
+print("\nSolution")
+print_solution(solution_with_ac3)
+
+print("\nBacktracking WITHOUT AC-3")
+print("Backtrack calls:", csp_without_ac3.backtrack_calls)
+print("Backtrack failures:", csp_without_ac3.backtrack_failures)
+print(
+    "Backtracking runtime:", 
+    backtracking_end_time - backtracking_start_time,
+    "seconds"
+    )
+
+print("\nAC-3 + Backtracking")
+print("AC-3:", ac3_result)
+print("Backtrack calls:", csp_with_ac3.backtrack_calls)
+print("Backtrack failures:", csp_with_ac3.backtrack_failures)
+print("Backtracking runtime:", 
+      backtracking_ac3_end_time - backtracking_ac3_start_time, 
+      "seconds"
+      )
+print(
+    "Total runtime (AC-3 + backtracking):", 
+    total_end_time - total_start_time, 
+    "seconds"
+    )
 
 # Expected output after implementing csp.ac_3() and csp.backtracking_search():
 # True
