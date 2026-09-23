@@ -2,6 +2,7 @@
 # The CSP.ac_3() and CSP.backtrack() methods need to be implemented
 
 from csp import CSP, alldiff
+import time
 
 
 def print_solution(solution):
@@ -54,8 +55,31 @@ csp = CSP(
     edges=edges,
 )
 
-print(csp.ac_3())
-print_solution(csp.backtracking_search())
+
+total_start_time = time.perf_counter()
+
+ac3_result = csp.ac_3()
+
+backtracking_start_time = time.perf_counter()
+
+solution = csp.backtracking_search()
+
+backtracking_end_time = time.perf_counter()
+
+total_end_time = time.perf_counter()
+
+print("AC-3:", ac3_result)
+
+for variable in csp.variables:
+    print(variable, csp.domains[variable])
+
+print_solution(solution)
+
+print("Backtrack calls:", csp.backtrack_calls)
+print("Backtrack failures:", csp.backtrack_failures)
+
+print("Backtracking runtime:", backtracking_end_time - backtracking_start_time, "seconds")
+print("Total runtime (AC-3 + backtracking):", total_end_time - total_start_time, "seconds")
 
 # Expected output after implementing csp.ac_3() and csp.backtracking_search():
 # True
