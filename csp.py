@@ -51,7 +51,7 @@ class CSP:
 
 
         for x_verdi in set(self.domains[Xi]):
-            godkjent = False #om verdien til Xi er lovlig gitt Xj
+            godkjent = False # Whether the value of Xi is valid given Xj
             for y_verdi in set (self.domains[Xj]):
                 if((x_verdi,y_verdi) in contstraint_frem):
                     godkjent = True
@@ -71,7 +71,7 @@ class CSP:
         bool
             False if a domain becomes empty, otherwise True
         """
-        #sikre at man får med alle siden forskjell på rekkefølge
+        # Add both directions of each constraint to the queue
         kø = []
         for(Xi, Xj) in self.binary_constraints:
             kø.append((Xi, Xj))
@@ -82,7 +82,7 @@ class CSP:
             if self.revise(Xi, Xj):
                 if len(self.domains[Xi])==0:
                     return False
-                #finne naboer og legge til
+                # Find the neighbors of Xi and add them to the queue
                 naboer = set()
                 for (A, B) in self.binary_constraints:
                     if A == Xi and B != Xj:
@@ -101,7 +101,7 @@ class CSP:
         None | dict[str, Any]
             A solution if any exists, otherwise None
         """
-
+        # Counters used to compare the search with and without AC-3
         backtrack_calls = 0
         backtrack_failures = 0
 
@@ -109,18 +109,21 @@ class CSP:
             nonlocal backtrack_calls, backtrack_failures
             backtrack_calls += 1
 
-
+            # If the assignemnt is complete it means that a solution has been found
             if len(assignment) == len(self.variables):
                 return assignment
 
+            # Selecting the first unassigned variable
             for variable in self.variables:
                 if variable not in assignment:
                     var = variable
                     break
 
+            # Try each value in the domain of the selected varaible
             for value in self.domains[var]:
                 consistent = True
 
+                # Check if the value violates any constraint with variables that have already been assigned
                 for assigned_var in assignment:
                     assigned_value = assignment[assigned_var]
 
@@ -135,14 +138,17 @@ class CSP:
                         break
 
                 if consistent:
+                    # Add the value and recursively continue with the next variable
                     assignment[var] = value
                     result = backtrack(assignment)
 
                     if result is not None:
                         return result
 
+                    # The assignment did not lead to a solution so we backtrack
                     del assignment[var]
 
+            # No value resulted in a solution for this assignment
             backtrack_failures += 1
             return None
 
